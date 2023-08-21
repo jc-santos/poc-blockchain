@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
 import Greeter from "./artifacts/contracts/Greeter.sol/Greeter.json";
 import Logger from "./artifacts/contracts/TransactionLogger.sol/TransactionLogger.json";
+import Tokenizer from "./artifacts/contracts/Tokenizer.sol/Tokenizer.json";
+import FlexBenToken from "./artifacts/contracts/FlexBenToken.sol/FlexBenToken.json"
 import pilmicoLogo from "./assets/pilmico-logo.png";
 import './App.css'
+import { BigNumber } from 'alchemy-sdk';
 
 // JC HARDHAT LOCALHOST
 // const contractAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
@@ -13,6 +16,8 @@ import './App.css'
 
 // JC ABOITIZ ALCHEMY ACCOUNT
 const contractAddress = "0xDee7055478A2D0004A685B3d080f0772a7Ae7f45";
+const tokenizerContractAddress = "0x72AD06Aa3a9F9D5e286AFAd7b5db679ED39F5847";
+const flexbenContractAddress = "0x5c690cf4E4623c59355408A17f4ECD1d785711e5";
 
 
 function App() {
@@ -23,6 +28,8 @@ function App() {
 
   const [ message, setMessage ] = useState("");
   const [currentGreeting, setCurrentGreeting] = useState("");
+
+  const [ mintAmount, setMintAmount ] = useState(0);
 
   async function connect() {
     await window.ethereum.request({ method: 'eth_requestAccounts' })  
@@ -86,6 +93,24 @@ function App() {
     setCurrentGreeting("");
   }
 
+  async function handleMint() {
+    if (typeof window.ethereum !== undefined || typeof window.ethereum !== "undefined") {
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+
+      const contract = new ethers.Contract(flexbenContractAddress, FlexBenToken.abi, signer);
+
+      try {
+        const response = await contract.mint(mintAmount);
+        console.log("response: ", response);
+        
+      } catch(err) {
+        console.log("error: ", err);
+      }
+    }
+  }
+
   useEffect(() => {
     try {
       if (typeof window.ethereum !== "undefined" || typeof window.ethereum !== undefined) {
@@ -117,7 +142,10 @@ function App() {
               <div className="collapse navbar-collapse" id="navbarCollapse">
                 <ul className="navbar-nav me-auto mb-2 mb-md-0">
                   <li className="nav-item">
-                    <a className="nav-link" aria-current="page" href="#">Home</a>
+                    <a className="nav-link" aria-current="page" href="#poc1">Transaction Logger</a>
+                  </li>
+                  <li className="nav-item">
+                    <a className="nav-link" aria-current="page" href="#poc2">FlexBen Points Tokenizer</a>
                   </li>
                 </ul>
                 <div>
@@ -143,12 +171,13 @@ function App() {
           </nav>
         </header>  
         <main>
-          <div className="container mt-5 main-wrapper">
+          {/* STORING / FETCH DATA TO THE BLOCKCHAIN */}
+          <div className="container mt-5 main-wrapper" id="poc1">
             <div className="mb-5 mt-5"></div>
             <div className="row text-center">
+              <p><i>POC #1</i></p>
               <h2>System Transaction Logging</h2>
-              <p>
-                <i>A blockchain proof of concept</i></p>
+              <p><i>A blockchain proof of concept</i></p>
             </div>
             <div className="row">
               <div className="col-md-12">
@@ -208,11 +237,76 @@ function App() {
               </div>
 
             </div>
-
+            <div className="spacer"></div>
+            <div className="spacer"></div>
+            <div className="spacer"></div>
+            <div className="spacer"></div>
+            <div className="spacer"></div>
           </div>
-          <div className="container">
+
+          {/* TOKENIZING FLEXBEN POINTS */}
+          <div className="container main-wrapper mb-5" id="poc2">            
+            <div className="row text-center">
+              <p><i>POC #2</i></p>
+              <h2>Tokenizing FlexBen Points</h2>
+              <p><i>A blockchain proof of concept</i></p>
+            </div>
+            <div className="row">
+              <div className="col-md-12">
+                  <div className="alert alert-primary text-center" role="alert">              
+                    <p>
+                      <strong>
+                      The purpose of this demo is to showcase the feasibility of converting FlexBen Points into a FlexBen Token (FBT).
+                      </strong>
+                    </p>
+                  </div>
+                </div>              
+            </div>  
+            <div className="row">
+              <div className="col-md-12 mb-3">
+                {
+                  hasWallet
+                    ? <>
+                      {
+                        isWalletConnected
+                          ? <>
+                            <div className="row">
+                              <div className="col-md-12">
+                                <input type="text" 
+                                  className="form-control mb-1" 
+                                  placeholder="Enter your Flexben Points" 
+                                  value={mintAmount}
+                                  onChange={(e) => {                                    
+                                    setMintAmount(parseInt(e.target.value))
+                                  }}/>
+                                <button 
+                                  className='btn btn-primary'
+                                  onClick={handleMint}>Convert Points to FBT (FlexBen Token)</button>
+                              </div>
+                            </div>
+                          </>
+                          : <div className="alert alert-warning text-center" role="alert">
+                          <strong>Please connect your Metamask wallet</strong>
+                        </div>
+                      }
+                    </>
+                    : <div className="alert alert-warning text-center" role="alert">
+                    <strong>Please install a Metamask wallet</strong>
+                  </div>
+                }
+              </div>
+            </div>
+            <div className="mb-5 mt-5"></div>
+          </div>
+
+          {/* FOOTER */}
+          <div>
+            <div className="spacer"></div>
+            <div className="mb-5 mt-5"></div>
+            <div className="spacer"></div>
+            <div className="spacer"></div>
+            <div className="spacer"></div>
             <div>
-              <hr />
               <p className="text-center">
                 Pilmico Foods Corporation © 2023. All rights reserved.
               </p>
